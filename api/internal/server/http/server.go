@@ -61,7 +61,6 @@ func (s *Server) Init() {
 		log.Panicf("[http] set trusted proxy failed: %s\n", err.Error())
 	}
 
-	// gin env
 	if s.service.Debug == false {
 		gin.SetMode(gin.ReleaseMode)
 		gin.DefaultWriter = io.Discard
@@ -69,9 +68,9 @@ func (s *Server) Init() {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	// set middleware
 	s.engine.Use(
-		gin.Logger(), gin.Recovery(), middlewares.Cors(),
+		//gin.Logger(),
+		gin.Recovery(), middlewares.Cors(),
 		gin.CustomRecovery(middlewares.ErrorHandler),
 	)
 }

@@ -84,19 +84,16 @@ func (c *App) DB() orm.ISql {
 }
 
 func (c *App) initQueue() {
-	if c.Config().Env == "development" {
-		ctrl := gomock.NewController(mock.NewController())
-		defer ctrl.Finish()
+	//c.queue = queue.New(c.registry, c.locale) // the main implemented sqs conn.
 
-		mockQueue := sqs.NewMockIQueue(ctrl)
-		mockQueue.EXPECT().Init().Times(1)
-		mockQueue.EXPECT().Send(gomock.Any()).Return(nil).AnyTimes()
+	ctrl := gomock.NewController(mock.NewController())
+	defer ctrl.Finish()
 
-		c.queue = mockQueue
-	} else {
-		c.queue = queue.New(c.registry, c.locale)
-	}
+	mockQueue := sqs.NewMockIQueue(ctrl)
+	mockQueue.EXPECT().Init().Times(1)
+	mockQueue.EXPECT().Send(gomock.Any()).Return(nil).AnyTimes()
 
+	c.queue = mockQueue
 	c.queue.Init()
 }
 
