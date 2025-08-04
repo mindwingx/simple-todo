@@ -3,3 +3,4 @@
 .DS_Store
 main
 .env
+logs/*.log
