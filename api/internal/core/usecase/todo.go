@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"microservice/internal/adapter/locale"
 	"microservice/internal/adapter/logger"
+	"microservice/internal/adapter/queue"
 	"microservice/internal/core/domain"
 	"microservice/internal/core/port"
 )
@@ -13,11 +14,12 @@ import (
 type TodoUsecase struct {
 	lgr      logger.ILogger
 	l        locale.ILocale
+	queue    queue.IQueue
 	todoRepo port.ITodoRepository
 }
 
-func NewTodo(lgr logger.ILogger, l locale.ILocale, todoRepo port.ITodoRepository) port.ITodoUsecase {
-	return &TodoUsecase{l: l, lgr: lgr, todoRepo: todoRepo}
+func NewTodo(lgr logger.ILogger, l locale.ILocale, queue queue.IQueue, todoRepo port.ITodoRepository) port.ITodoUsecase {
+	return &TodoUsecase{l: l, lgr: lgr, queue: queue, todoRepo: todoRepo}
 }
 
 func (uc *TodoUsecase) Create(ctx context.Context, ent *domain.Todo) (res *domain.Todo, err error) {
@@ -27,7 +29,16 @@ func (uc *TodoUsecase) Create(ctx context.Context, ent *domain.Todo) (res *domai
 		return
 	}
 
-	uc.lgr.Info("todo.uc.create", zap.Any("item.uuid", item.UUID().String()))
+	go func() {
+		const scope = "todo.uc.create.queue.send"
+
+		txErr = uc.queue.Send(item)
+		if txErr != nil {
+			uc.lgr.Error(scope, zap.Error(txErr), zap.Any("item.id", item.UUID().String()))
+		}
+
+		uc.lgr.Info(scope, zap.String("item.id", item.UUID().String()))
+	}()
 
 	res = item
 	return

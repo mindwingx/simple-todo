@@ -5,6 +5,7 @@ import (
 	"microservice/internal/adapter/locale"
 	"microservice/internal/adapter/logger"
 	"microservice/internal/adapter/orm"
+	"microservice/internal/adapter/queue"
 	"microservice/internal/adapter/registry"
 )
 
@@ -16,6 +17,7 @@ type App struct {
 	logger       logger.ILogger
 	locale       locale.ILocale
 	database     orm.ISql
+	queue        queue.IQueue
 	repo         *Repositories
 	port         *Ports
 	httpHandlers *HttpHandlers

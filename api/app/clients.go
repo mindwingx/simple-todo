@@ -2,13 +2,17 @@ package app
 
 import (
 	"fmt"
+	"go.uber.org/mock/gomock"
 	"log"
 	src "microservice"
 	"microservice/config"
 	"microservice/internal/adapter/locale"
 	"microservice/internal/adapter/logger"
 	"microservice/internal/adapter/orm"
+	"microservice/internal/adapter/queue"
+	sqs "microservice/internal/adapter/queue/mocks"
 	"microservice/internal/adapter/registry"
+	"microservice/pkg/mock"
 	"time"
 )
 
@@ -18,6 +22,7 @@ func (c *App) InitClients() {
 	c.initLogger()
 	c.initLocale()
 	c.initDatabase()
+	c.initQueue()
 }
 
 // Clients
@@ -58,6 +63,15 @@ func (c *App) Locale() locale.ILocale {
 	return c.locale
 }
 
+func (c *App) initLogger() {
+	c.logger = logger.New(c.registry)
+	c.logger.Init()
+}
+
+func (c *App) Logger() logger.ILogger {
+	return c.logger
+}
+
 func (c *App) initDatabase() {
 	c.database = orm.New(c.Config(), c.registry, c.locale)
 	c.database.Init()
@@ -69,11 +83,23 @@ func (c *App) DB() orm.ISql {
 	return c.database
 }
 
-func (c *App) initLogger() {
-	c.logger = logger.New(c.registry)
-	c.logger.Init()
+func (c *App) initQueue() {
+	if c.Config().Env == "development" {
+		ctrl := gomock.NewController(mock.NewController())
+		defer ctrl.Finish()
+
+		mockQueue := sqs.NewMockIQueue(ctrl)
+		mockQueue.EXPECT().Init().Times(1)
+		mockQueue.EXPECT().Send(gomock.Any()).Return(nil).AnyTimes()
+
+		c.queue = mockQueue
+	} else {
+		c.queue = queue.New(c.registry, c.locale)
+	}
+
+	c.queue.Init()
 }
 
-func (c *App) Logger() logger.ILogger {
-	return c.logger
+func (c *App) Queue() queue.IQueue {
+	return c.queue
 }

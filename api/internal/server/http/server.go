@@ -58,7 +58,7 @@ func (s *Server) Engine() *gin.Engine {
 func (s *Server) Init() {
 	err := s.engine.SetTrustedProxies([]string{trustedProxy})
 	if err != nil {
-		log.Panicf("[delivery] set trusted proxy failed: %s\n", err.Error())
+		log.Panicf("[http] set trusted proxy failed: %s\n", err.Error())
 	}
 
 	// gin env
@@ -86,7 +86,7 @@ func (s *Server) Start() {
 
 	go func() {
 		if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Panicf("[delivery] failed to start usecase: %s\n", err.Error())
+			log.Panicf("[http] failed to start usecase: %s\n", err.Error())
 		}
 	}()
 }
@@ -94,7 +94,7 @@ func (s *Server) Start() {
 func (s *Server) Stop(ctx context.Context) {
 	if s.service.Debug == true {
 		_ = s.server.Close()
-		log.Printf("[delivery] server stopped succesfully")
+		log.Printf("[http] server stopped succesfully")
 		return
 	}
 
@@ -104,14 +104,14 @@ func (s *Server) Stop(ctx context.Context) {
 	select {
 	case err := <-shutdownErr:
 		if err != nil {
-			log.Printf("[delivery] server shutdown err: %s", err)
+			log.Printf("[http] server shutdown err: %s", err)
 			_ = s.server.Close() // force to close usecase
-			log.Printf("[delivery] server closed")
+			log.Printf("[http] server closed")
 		}
 
-		log.Printf("[delivery] server stopped succesfully")
+		log.Printf("[http] server stopped succesfully")
 	case <-ctx.Done():
 		_ = s.server.Close()
-		log.Printf("[delivery] context timeout - server closed")
+		log.Printf("[http] context timeout - server closed")
 	}
 }

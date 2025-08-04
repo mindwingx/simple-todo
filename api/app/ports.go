@@ -11,5 +11,5 @@ type Ports struct {
 
 func (c *App) InitPorts() {
 	c.port = new(Ports)
-	c.port.TodoUC = usecase.NewTodo(c.logger, c.locale, c.repo.TodoRepo)
+	c.port.TodoUC = usecase.NewTodo(c.logger, c.locale, c.queue, c.repo.TodoRepo)
 }
