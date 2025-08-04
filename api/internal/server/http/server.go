@@ -1,0 +1,117 @@
+package http
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"io"
+	"log"
+	"microservice/app"
+	"microservice/config"
+	"microservice/internal/adapter/locale"
+	"microservice/internal/adapter/registry"
+	"microservice/internal/server/http/middlewares"
+	_ "microservice/pkg/validator"
+	"net/http"
+	"os"
+)
+
+type Server struct {
+	l            locale.ILocale
+	service      config.Service
+	swagger      config.Swagger
+	config       config.Http
+	repositories *app.Repositories
+	handlers     *app.HttpHandlers
+	engine       *gin.Engine
+	server       *http.Server
+}
+
+func New(
+	registry registry.IRegistry,
+	locale locale.ILocale,
+	repositories *app.Repositories,
+	handlers *app.HttpHandlers,
+) IHttpServer {
+	server := new(Server)
+	registry.Parse(&server.service)
+	registry.Parse(&server.swagger)
+	registry.Parse(&server.config)
+
+	if server.service.Debug == false {
+		server.swagger.Host = os.Getenv("SWAGGER_HOST")
+	}
+
+	server.l = locale
+	server.handlers = handlers
+	server.repositories = repositories
+	server.engine = gin.Default()
+
+	return server
+}
+
+func (s *Server) Engine() *gin.Engine {
+	return s.engine
+}
+
+func (s *Server) Init() {
+	err := s.engine.SetTrustedProxies([]string{trustedProxy})
+	if err != nil {
+		log.Panicf("[delivery] set trusted proxy failed: %s\n", err.Error())
+	}
+
+	// gin env
+	if s.service.Debug == false {
+		gin.SetMode(gin.ReleaseMode)
+		gin.DefaultWriter = io.Discard
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
+	// set middleware
+	s.engine.Use(
+		gin.Logger(), gin.Recovery(), middlewares.Cors(),
+		gin.CustomRecovery(middlewares.ErrorHandler),
+	)
+}
+
+func (s *Server) Start() {
+	s.server = &http.Server{
+		Addr:    fmt.Sprintf("%s:%s", s.config.Host, s.config.Port),
+		Handler: s.engine,
+	}
+
+	fmt.Printf("\n[http] started on port %s\n", s.config.Port)
+
+	go func() {
+		if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Panicf("[delivery] failed to start usecase: %s\n", err.Error())
+		}
+	}()
+}
+
+func (s *Server) Stop(ctx context.Context) {
+	if s.service.Debug == true {
+		_ = s.server.Close()
+		log.Printf("[delivery] server stopped succesfully")
+		return
+	}
+
+	shutdownErr := make(chan error)
+	go func() { shutdownErr <- s.server.Shutdown(ctx) }()
+
+	select {
+	case err := <-shutdownErr:
+		if err != nil {
+			log.Printf("[delivery] server shutdown err: %s", err)
+			_ = s.server.Close() // force to close usecase
+			log.Printf("[delivery] server closed")
+		}
+
+		log.Printf("[delivery] server stopped succesfully")
+	case <-ctx.Done():
+		_ = s.server.Close()
+		log.Printf("[delivery] context timeout - server closed")
+	}
+}

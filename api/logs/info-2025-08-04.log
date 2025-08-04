@@ -1,0 +1,1 @@
+{"level":"info","ts":1754307345.5186071,"caller":"usecase/todo.go:30","msg":"todo.uc.create","usecase":"development","item.uuid":"ea6c9e72-3232-4d5c-ad8c-de40afb503c8"}
