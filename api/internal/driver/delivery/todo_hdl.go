@@ -77,9 +77,9 @@ func (h *TodoHandler) GetDetails(ctx *gin.Context) {
 	}
 
 	id := req.UUID()
-	res, svcErr := h.todoUC.Detail(ctx, &id)
-	if svcErr != nil {
-		meta.Resp(ctx, h.l).ServiceErr(svcErr).Json()
+	res, ucErr := h.todoUC.Detail(ctx, &id)
+	if ucErr != nil {
+		meta.Resp(ctx, h.l).ServiceErr(ucErr).Json()
 		return
 	}
 
