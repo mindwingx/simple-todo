@@ -2,12 +2,13 @@ package orm
 
 import "gorm.io/gorm"
 
-type (
-	ISql interface {
-		ISqlGeneric
-		ISqlTx
-	}
+//go:generate mockgen -source=./contract.go -destination=./mocks/orm_mock.go -package=orm_mock
+type ISql interface {
+	ISqlGeneric
+	ISqlTx
+}
 
+type (
 	ISqlGeneric interface {
 		Init()
 		C() *gorm.DB

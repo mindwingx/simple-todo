@@ -1,7 +1,7 @@
 name: "microservice"
 
 include:
-#  - docker/app.yml
+  - docker/app.yml
   - docker/database.yml
 
 networks:

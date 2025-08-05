@@ -34,7 +34,8 @@ func (uc *TodoUsecase) Create(ctx context.Context, ent *domain.Todo) (res *domai
 
 		txErr = uc.queue.Send(item)
 		if txErr != nil {
-			uc.lgr.Error(scope, zap.Error(txErr), zap.Any("item.id", item.UUID().String()))
+			uc.lgr.Error(scope, zap.Any("item.id", item.UUID().String()), zap.Error(txErr))
+			return
 		}
 
 		uc.lgr.Info(scope, zap.String("item.id", item.UUID().String()))

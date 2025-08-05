@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate mockgen -source=./contract.go -destination=./mocks/logger_mock.go -package=logger_mock
 type ILogger interface {
 	Init()
 	Stop()

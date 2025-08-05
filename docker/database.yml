@@ -1,5 +1,5 @@
 services:
-  gn-database:
+  database:
     image: 'postgres:latest'
     container_name: microservice-db
     restart: always

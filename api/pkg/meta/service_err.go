@@ -20,7 +20,7 @@ type (
 )
 
 func ServiceErr(msg st.HttpMappedStatus, err ...error) *Error {
-	se := &Error{Msg: msg}
+	se := &Error{Msg: msg, Err: errors.New("")}
 	if len(err) > 0 {
 		se.Err = err[0]
 	}

@@ -1,5 +1,5 @@
-.PHONY: up
-up:
+.PHONY: run
+run:
 	@echo "docker compose up"
 	@docker compose -f docker-compose.yml up -d
 

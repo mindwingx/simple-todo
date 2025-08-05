@@ -44,7 +44,7 @@ func (tr *TodoRepository) Create(ctx context.Context, ent *domain.Todo) (res *do
 			return
 		}
 
-		err = meta.ServiceErr(status.Failed)
+		err = meta.ServiceErr(status.Failed, txErr)
 		return
 	}
 

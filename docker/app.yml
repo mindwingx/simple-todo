@@ -10,7 +10,7 @@ services:
     environment:
       - DB_DATABASE=microservice
       - DB_DEBUG=false
-      - DB_HOST=gn-database
+      - DB_HOST=database
       - DB_MAX_IDLE_CONNECTIONS=5
       - DB_MAX_LIFETIME_SECONDS=10
       - DB_MAX_OPEN_CONNECTIONS=10
@@ -25,6 +25,6 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - gn-database
+      - database
     networks:
       - backend
