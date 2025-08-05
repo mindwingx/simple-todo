@@ -57,9 +57,6 @@ func (q *queue) Init() {
 	}
 
 	q.sqs = sqs.New(awsSession)
-	if err != nil {
-		return
-	}
 
 	q.lgr.Info("aws.init.success", zap.String("env", q.service.Env))
 	return

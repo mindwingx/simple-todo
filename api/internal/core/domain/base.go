@@ -13,8 +13,8 @@ type Base struct {
 	deletedAt *time.Time
 }
 
-func NewBase(ID *uint, UUID *uuid.UUID, createdAt *time.Time, updatedAt *time.Time, deletedAt *time.Time) *Base {
-	return &Base{id: ID, uuid: UUID, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt}
+func NewBase() *Base {
+	return &Base{}
 }
 
 func (bd *Base) SetID(id *uint) {

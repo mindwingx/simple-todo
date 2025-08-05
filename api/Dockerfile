@@ -6,13 +6,11 @@ COPY . .
 
 ENV PATH=$PATH:/go/bin
 
-RUN apk update && apk add make protobuf-dev g++ bash
+RUN apk update && apk add make g++ bash
 
-RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.30.0 && \
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-RUN make swag proto
+RUN make swag
 
 ENV GOPROXY https://goproxy.io
 
@@ -24,9 +22,12 @@ FROM alpine:3.20 AS production
 
 WORKDIR /app
 
-RUN mkdir -p /app/locale /app/logs && chmod 755 /app/locale /app/logs
+RUN mkdir -p /app/locale /app/logs /app/schema/psql && chmod 755 /app/locale /app/logs /app/schema/psql
+
+COPY schema/psql /app/schema/psql
 
 COPY internal/adapter/locale/translation /app/locale
+
 COPY .env.example .
 
 RUN mv .env.example .env

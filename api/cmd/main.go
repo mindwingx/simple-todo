@@ -27,7 +27,7 @@ func New() *Service {
 }
 
 func (a *Service) start() {
-	fmt.Printf("\n[usecase] starting...\n")
+	fmt.Printf("\n[service] starting...\n")
 
 	a.service = app.New()
 	a.service.Init()

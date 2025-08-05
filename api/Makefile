@@ -9,14 +9,8 @@ swag:
 	@swag init -g ./cmd/main.go -q -o ./docs
 	@echo "swagger generated"
 
-proto:
-	@mkdir -p pb/gen/go
-
-	@protoc -I pb/proto \
-	--go_out pb/gen/go \
-	--go_opt paths=source_relative \
-	--go-grpc_out pb/gen/go \
-	--go-grpc_opt paths=source_relative \
-	  pb/proto/*/*.proto
-
-	@echo "proto files generated"
+.PHONY: tests
+tests:
+	@go test ./internal/adapter/repository -run TestTodoRepository_Create -v
+	@go test ./internal/core/usecase -run TestTodoUsecase_Create -v
+	@echo "TESTS WERE DONE"

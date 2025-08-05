@@ -104,18 +104,10 @@ func (tr *TodoRepository) GetList(ctx context.Context, qp *domain.TodoListReqQry
 		return
 	}
 
-	if count.RowsAffected == 0 {
-		return
-	}
-
 	items := tx.Order(sort).Offset(offset).Limit(qp.Limit()).Find(&models)
 
 	if err = items.Error; err != nil {
 		tr.lgr.Error("todo.repo.list", zap.Error(err))
-		return
-	}
-
-	if items.RowsAffected == 0 {
 		return
 	}
 
